@@ -3,10 +3,10 @@ rm(list=ls()) #remove previous variable assignments
 # source redcap data -------------------------------------------------------
 source("Codes/REDCap_extract_case_data.R")
 
-# subset aic cohort  
+# format cohort  
 R01_lab_results$id_cohort<-substr(R01_lab_results$person_id, 2, 2) #F and M are AIC, 0 C and D are other
 R01_lab_results <- within(R01_lab_results, id_cohort[R01_lab_results$id_cohort=="M"] <- "F")
-R01_lab_results <- subset(R01_lab_results, id_cohort == "F")
+# R01_lab_results <- subset(R01_lab_results, id_cohort == "F")
 
 # Create a new variable by studyID for study site
 R01_lab_results$id_city<-substr(R01_lab_results$person_id, 1, 1) #C is Chulaimbo, K is Kisumu, M is Msambweni, U is Ukunda, one 0 not sure, R is also Chulaimbo, G stands for Nganja (one of the subparts of Msambweni), L is for Mililani (part of Msambweni)
@@ -115,14 +115,23 @@ R01_lab_results$prnt_result_chikv<-NA
 R01_lab_results <- within(R01_lab_results, prnt_result_chikv[R01_lab_results$prnt_80_chikv <10] <- 0)
 R01_lab_results <- within(R01_lab_results, prnt_result_chikv[R01_lab_results$prnt_80_chikv >=10] <- 1)
 
+# ufi2
+R01_lab_results$ufi2_result_denv<-NA
+R01_lab_results <- within(R01_lab_results, ufi2_result_denv[R01_lab_results$denv_ct_ufi2 >45] <- 0)
+R01_lab_results <- within(R01_lab_results, ufi2_result_denv[R01_lab_results$denv_ct_ufi2 <=45] <- 1)
+
+R01_lab_results$ufi2_result_chikv<-NA
+R01_lab_results <- within(R01_lab_results, ufi2_result_chikv[R01_lab_results$chikv_ct_ufi2 >45] <- 0)
+R01_lab_results <- within(R01_lab_results, ufi2_result_chikv[R01_lab_results$chikv_ct_ufi2 <=45] <- 1)
+
 #stfd denv igg seroconverters or PCR positives as infected. 
-R01_lab_results$infected_denv_stfd[R01_lab_results$tested_denv_stfd_igg ==1 |R01_lab_results$result_pcr_denv_kenya==0|R01_lab_results$result_pcr_denv_stfd==0|R01_lab_results$denv_result_ufi==0|R01_lab_results$prnt_result_denv==0]<-0
-R01_lab_results$infected_denv_stfd[R01_lab_results$seroc_denv_stfd_igg==1|R01_lab_results$result_pcr_denv_kenya==1|R01_lab_results$result_pcr_denv_stfd==1|R01_lab_results$denv_result_ufi==1|R01_lab_results$prnt_result_denv==1]<-1
+R01_lab_results$infected_denv_stfd[R01_lab_results$tested_denv_stfd_igg ==1 |R01_lab_results$result_pcr_denv_kenya==0|R01_lab_results$result_pcr_denv_stfd==0|R01_lab_results$denv_result_ufi==0|R01_lab_results$prnt_result_denv==0|R01_lab_results$ufi2_result_denv==0]<-0
+R01_lab_results$infected_denv_stfd[R01_lab_results$seroc_denv_stfd_igg==1|R01_lab_results$result_pcr_denv_kenya==1|R01_lab_results$result_pcr_denv_stfd==1|R01_lab_results$denv_result_ufi==1|R01_lab_results$prnt_result_denv==1|R01_lab_results$ufi2_result_denv==1]<-1
 # table(R01_lab_results$infected_denv_stfd)
 
 #stfd chikv igg seroconverters or PCR positives as infected. or PNRT +
-R01_lab_results$infected_chikv_stfd[R01_lab_results$tested_chikv_stfd_igg ==1 |R01_lab_results$result_pcr_chikv_kenya==0|R01_lab_results$chikv_result_ufi==0|R01_lab_results$prnt_result_chikv==0]<-0
-R01_lab_results$infected_chikv_stfd[R01_lab_results$seroc_chikv_stfd_igg==1|R01_lab_results$result_pcr_chikv_kenya==1|R01_lab_results$chikv_result_ufi==1|R01_lab_results$prnt_result_chikv==1]<-1
+R01_lab_results$infected_chikv_stfd[R01_lab_results$tested_chikv_stfd_igg ==1 |R01_lab_results$result_pcr_chikv_kenya==0|R01_lab_results$chikv_result_ufi==0|R01_lab_results$prnt_result_chikv==0|R01_lab_results$ufi2_result_chikv==0]<-0
+R01_lab_results$infected_chikv_stfd[R01_lab_results$seroc_chikv_stfd_igg==1|R01_lab_results$result_pcr_chikv_kenya==1|R01_lab_results$chikv_result_ufi==1|R01_lab_results$prnt_result_chikv==1|R01_lab_results$ufi2_result_chikv==1]<-1
 # table(R01_lab_results$infected_chikv_stfd)
 
 aic.tsi.foi <- R01_lab_results[,c("person_id", "id_site", "redcap_event_name", "int_date"
